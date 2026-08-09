@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+/* 
+  Converted from @theme to :root to suppress the VS Code "Unknown at rule @theme" warning.
+  Tailwind v4 fully supports standard CSS variables!
+*/
+:root {
+  --color-dark: #17140F;
+  --color-coral: #FF5F4E;
+  --color-cream: #F5F2EA;
+  --color-muted: #A8A296;
+
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-dark);
+    color: var(--color-muted);
+    font-family: var(--font-body);
+  }
+}
+
+@layer utilities {
+  .animate-pulse-coral {
+    animation: pulse-coral 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}
+
+@keyframes pulse-coral {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
