@@ -21,6 +21,14 @@ const marketplaceItemSchema = new mongoose.Schema({
   created_at: {
     type: Date,
     default: Date.now
+  },
+  image: {
+    type: String,
+    default: 'https://via.placeholder.com/300?text=No+Image'
+  },
+  whatsappNumber: {
+    type: String,
+    required: [true, 'Please provide a WhatsApp number for contact']
   }
 });
 

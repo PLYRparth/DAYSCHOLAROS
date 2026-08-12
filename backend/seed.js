@@ -8,7 +8,7 @@ const MarketplaceItem = require('./models/MarketplaceItem');
 const StudyMaterial = require('./models/StudyMaterial');
 const HousingReview = require('./models/HousingReview');
 
-mongoose.connect('mongodb://localhost:27017/dayscholar-os');
+mongoose.connect('mongodb://127.0.0.1:27017/dayscholar');
 
 const seedData = async () => {
   try {
@@ -26,7 +26,7 @@ const seedData = async () => {
     if (!user) {
       user = await User.create({
         email: 'seed_admin@college.edu.in',
-        password: 'password123',
+        passwordHash: await require('bcryptjs').hash('password123', 10),
         isVerified: true,
         role: 'admin'
       });
@@ -68,14 +68,22 @@ const seedData = async () => {
     // 4. Seed 10 Marketplace Listings
     console.log('Seeding Marketplace Items...');
     const categories = ['Electronics', 'Books', 'Furniture', 'Stationery', 'Misc'];
+    const marketplaceImages = [
+      'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=500&q=80',
+      'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&q=80',
+      'https://images.unsplash.com/photo-1505693314120-0d443867891c?w=500&q=80',
+      '', // Test fallback
+      'https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=500&q=80'
+    ];
     const marketplaceItems = [];
     for (let i = 0; i < 10; i++) {
       marketplaceItems.push({
         category: categories[i % categories.length],
         price: (i + 1) * 150,
-        // Description avoids UPI and Phone patterns as dictated by Phase 3 hook
         description: `Barely used ${categories[i % categories.length]} item. Condition is great. DM on Discord for details.`,
-        seller_id: userId
+        seller_id: userId,
+        whatsappNumber: `91987654321${i}`,
+        image: marketplaceImages[i % marketplaceImages.length] || undefined
       });
     }
     await MarketplaceItem.insertMany(marketplaceItems);
