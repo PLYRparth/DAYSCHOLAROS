@@ -25,10 +25,20 @@ const commuteRequestSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  isPrivate: {
+    type: Boolean,
+    default: false
+  },
+  memberLimit: {
+    type: Number,
+    default: 4,
+    min: 2,
+    max: 10
+  },
   createdAt: {
     type: Date,
     default: Date.now,
-    expires: 1200 // TTL index: Document will automatically be deleted 1200 seconds (20 mins) after createdAt
+    expires: 3600 // TTL index: Document will automatically be deleted 3600 seconds (1 hr) after createdAt
   }
 });
 

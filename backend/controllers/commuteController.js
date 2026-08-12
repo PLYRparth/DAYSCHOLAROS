@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const CommuteRequest = require('../models/CommuteRequest');
 
 exports.reportNoShow = async (req, res) => {
   try {
@@ -25,6 +26,15 @@ exports.reportNoShow = async (req, res) => {
         reliabilityScore: targetUser.reliabilityScore
       }
     });
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+};
+
+exports.getPublicRooms = async (req, res) => {
+  try {
+    const rooms = await CommuteRequest.find({ isPrivate: false }).sort('-createdAt');
+    res.status(200).json({ status: 'success', data: { rooms } });
   } catch (err) {
     res.status(500).json({ status: 'error', message: err.message });
   }
