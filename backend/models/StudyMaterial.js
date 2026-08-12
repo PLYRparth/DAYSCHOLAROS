@@ -27,6 +27,10 @@ const studyMaterialSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  upvotedBy: [{
+    type: mongoose.Schema.ObjectId,
+    ref: 'User'
+  }],
   created_at: {
     type: Date,
     default: Date.now

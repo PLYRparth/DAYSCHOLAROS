@@ -1,20 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import StandardCard from '../components/StandardCard';
+import { useAuth } from '../context/AuthContext';
 
 const ShadowCampus = () => {
   const [materials, setMaterials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploadStatus, setUploadStatus] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   
+  const { user } = useAuth();
+
   // Upload form state
   const [title, setTitle] = useState('');
   const [subjectTag, setSubjectTag] = useState('');
   const [file, setFile] = useState(null);
 
-  const fetchMaterials = async () => {
+  const fetchMaterials = async (query = searchQuery) => {
     try {
-      const res = await axios.get('/study-materials');
+      const res = await axios.get(query ? `/study-materials?search=${encodeURIComponent(query)}` : '/study-materials');
       setMaterials(res.data.data.materials);
     } catch (err) {
       console.error(err);
@@ -26,6 +30,21 @@ const ShadowCampus = () => {
   useEffect(() => {
     fetchMaterials();
   }, []);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    fetchMaterials();
+  };
+  
+  const handleUpvote = async (id) => {
+    try {
+      const res = await axios.put(`/study-materials/${id}/upvote`);
+      const updatedMaterial = res.data.data.material;
+      setMaterials(prev => prev.map(mat => mat._id === updatedMaterial._id ? updatedMaterial : mat));
+    } catch (err) {
+      console.error('Failed to upvote', err);
+    }
+  };
 
   const handleUpload = async (e) => {
     e.preventDefault();
@@ -110,8 +129,21 @@ const ShadowCampus = () => {
 
       {/* Browse Section */}
       <div className="w-full md:w-2/3">
-        <div className="flex justify-between items-end mb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end mb-6 gap-4">
           <h1 className="text-2xl font-display font-bold text-[var(--color-cream)]">Shadow Campus (Notes)</h1>
+          
+          <form onSubmit={handleSearch} className="flex relative w-full sm:w-64">
+            <input
+              type="text"
+              placeholder="Search notes..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-[#17140F] border border-[#3A362E] rounded-l-lg p-2 text-sm text-[var(--color-cream)] focus:outline-none focus:border-[var(--color-coral)] focus:ring-1 focus:ring-[var(--color-coral)] transition-colors placeholder:text-[var(--color-muted)]/40"
+            />
+            <button type="submit" className="bg-[#3A362E] text-[var(--color-cream)] px-4 py-2 rounded-r-lg text-sm font-medium hover:bg-[#4a453b] transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--color-coral)]">
+              Search
+            </button>
+          </form>
         </div>
         
         {loading ? (
@@ -135,14 +167,22 @@ const ShadowCampus = () => {
                   <div className="text-[10px] text-[var(--color-muted)]/70">
                     Uploader: {truncateId(mat.uploader_id)}
                   </div>
-                  <a 
-                    href={`http://localhost:5000${mat.file_url}`} 
-                    target="_blank" 
-                    rel="noreferrer"
-                    className="bg-[var(--color-coral)] text-[var(--color-dark)] px-4 py-1.5 rounded-full text-xs font-medium hover:opacity-90 transition-opacity whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-[var(--color-coral)] focus:ring-offset-2 focus:ring-offset-[#25221C]"
-                  >
-                    View file
-                  </a>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => handleUpvote(mat._id)}
+                      className={`px-4 py-1.5 rounded-full text-xs font-medium transition-opacity focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#25221C] ${mat.upvotedBy?.includes(user?.id) ? 'bg-[var(--color-cream)] text-[var(--color-dark)] focus:ring-[var(--color-cream)]' : 'bg-[#3A362E] text-[var(--color-cream)] hover:bg-[#4a453b] focus:ring-[#3A362E]'}`}
+                    >
+                      {mat.upvotedBy?.includes(user?.id) ? 'Upvoted' : 'Upvote'}
+                    </button>
+                    <a 
+                      href={`http://localhost:5000${mat.file_url}`} 
+                      target="_blank" 
+                      rel="noreferrer"
+                      className="bg-[var(--color-coral)] text-[var(--color-dark)] px-4 py-1.5 rounded-full text-xs font-medium hover:opacity-90 transition-opacity whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-[var(--color-coral)] focus:ring-offset-2 focus:ring-offset-[#25221C]"
+                    >
+                      View file
+                    </a>
+                  </div>
                 </div>
               </StandardCard>
             ))}
